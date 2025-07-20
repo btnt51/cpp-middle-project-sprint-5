@@ -63,27 +63,33 @@ private:
     std::uniform_int_distribution<int> type_dist;
 };
 
-std::vector<std::pair<Shape, Shape>> FindAllCollisions(ReplaceMe shapes) {
-    std::vector<std::pair<Shape, Shape>> collisions;
+std::vector<std::pair<Shape, Shape>> FindAllCollisions(const std::span<const Shape>& shapes) {
+    using Pair = std::pair<Shape, Shape>;
+    std::vector<Pair> collisions;
+    const auto n = shapes.size();
+    collisions.reserve(n);
 
-    /*
-     * Используйте библиотеку ranges, чтобы найти все коллизии между фигурами методом BoundingBoxesOverlap
-     *
-     * Также используйте наиболее эффективный метод добавления объектов в collisions
-     */
+    auto indices = std::views::iota(0u, n);
 
+    std::ranges::for_each(indices, [&](const unsigned i) {
+        auto rest = std::views::iota(i + 1u, n);
+        std::ranges::for_each(rest, [&](unsigned j) {
+            if (queries::BoundingBoxesOverlap(shapes[i], shapes[j])) {
+                collisions.emplace_back(shapes[i], shapes[j]);
+            }
+        });
+    });
+    collisions.shrink_to_fit();
     return collisions;
 }
 
-std::optional<size_t> FindHighestShape(ReplaceMe shapes) {
+std::optional<size_t> FindHighestShape(const std::span<const Shape>& shapes) {
+    if (shapes.empty()) {
+        return std::nullopt;
+    }
 
-    /*
-     * Используйте библиотеку ranges, чтобы найти самую высокую фигуру
-     *
-     * Важно: использование ручной итерации по фигурам не разрешается
-     */
-
-    return std::nullopt;
+    return *std::ranges::max_element(std::views::iota(0u, shapes.size()),
+        {}, [&](const size_t i) { return queries::GetHeight(shapes[i]); });
 }
 
 }  // namespace geometry::utils

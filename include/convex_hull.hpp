@@ -14,16 +14,21 @@ public:
     void Push(const Point2D &p) { s.push_back(p); }
     void Pop() { s.pop_back(); }
 
-    size_t Size() { return s.size(); }
-    Point2D Top() { return s.back(); }
-    Point2D NextToTop() { return *std::prev(s.end(), 2); }
+    [[nodiscard]] size_t Size() { return s.size(); }
+    [[nodiscard]] Point2D Top() const { return s.back(); }
+    [[nodiscard]] Point2D NextToTop() const { return *std::prev(s.end(), 2); }
 
     std::vector<Point2D> &&Extract() && { return std::move(s); }
+
+    [[nodiscard]] bool MakesRightTurn(const Point2D& next_point) const {
+        if (s.size() < 2) return false;
+        return CrossProduct(NextToTop(), Top(), next_point) <= 0;
+    }
 
 private:
     std::vector<Point2D> s;
 };
 
-GeometryResult<std::vector<Point2D>> GrahamScan(ReplaceMe points);
+GeometryResult<std::vector<Point2D>> GrahamScan(const std::span<const Point2D>& points);
 
 }  // namespace geometry::convex_hull
