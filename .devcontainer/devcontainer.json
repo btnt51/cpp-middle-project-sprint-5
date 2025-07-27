@@ -1,5 +1,5 @@
 {
-  "name": "Ubuntu25.04 with GCC15",
+  "name": "Ubuntu45.04 with GCC15",
   "build": {
       "dockerfile": "./Dockerfile",
       "context": "."
